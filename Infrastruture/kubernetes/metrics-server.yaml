@@ -1,0 +1,139 @@
+# # Metrics Server - Required for HPA to function
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: metrics-server
+#   namespace: kube-system
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   name: system:aggregated-metrics-reader
+# rules:
+# - apiGroups:
+#   - custom.metrics.k8s.io
+#   resources:
+#   - '*'
+#   verbs:
+#   - '*'
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   name: system:metrics-server
+# rules:
+# - apiGroups:
+#   - ""
+#   resources:
+#   - nodes/metrics
+#   verbs:
+#   - get
+# - apiGroups:
+#   - ""
+#   resources:
+#   - pods
+#   - nodes
+#   verbs:
+#   - get
+#   - list
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: RoleBinding
+# metadata:
+#   name: metrics-server-auth-reader
+#   namespace: kube-system
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: Role
+#   name: extension-apiserver-authentication-reader
+# subjects:
+# - kind: ServiceAccount
+#   name: metrics-server
+#   namespace: kube-system
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   name: metrics-server:system:auth-delegator
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: system:auth-delegator
+# subjects:
+# - kind: ServiceAccount
+#   name: metrics-server
+#   namespace: kube-system
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   name: system:metrics-server
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: system:metrics-server
+# subjects:
+# - kind: ServiceAccount
+#   name: metrics-server
+#   namespace: kube-system
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: metrics-server
+#   namespace: kube-system
+#   labels:
+#     kubernetes.io/name: "Metrics-server"
+#     kubernetes.io/component: "metrics-server"
+# spec:
+#   selector:
+#     component: metrics-server
+#   ports:
+#   - port: 443
+#     protocol: TCP
+#     targetPort: 4443
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: metrics-server
+#   namespace: kube-system
+#   labels:
+#     kubernetes.io/name: "Metrics-server"
+#     kubernetes.io/component: "metrics-server"
+# spec:
+#   selector:
+#     matchLabels:
+#       component: metrics-server
+#   template:
+#     metadata:
+#       labels:
+#         component: metrics-server
+#     spec:
+#       priorityClassName: system-cluster-critical
+#       serviceAccountName: metrics-server
+#       containers:
+#       - name: metrics-server
+#         image: k8s.gcr.io/metrics-server/metrics-server:v0.6.4
+#         args:
+#           - --cert-dir=/tmp
+#           - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+#           - --kubelet-insecure-tls
+#           - --kubelet-use-node-status-port
+#         ports:
+#         - name: https
+#           containerPort: 4443
+#           protocol: TCP
+#         resources:
+#           requests:
+#             cpu: 100m
+#             memory: 70Mi
+#         volumeMounts:
+#         - name: tmp-vol
+#           mountPath: /tmp
+#       volumes:
+#       - name: tmp-vol
+#         emptyDir: {}
+#       tolerations:
+#       - key: node-role.kubernetes.io/master
+#         effect: NoSchedule
