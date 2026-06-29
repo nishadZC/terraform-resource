@@ -1,0 +1,37 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Launch an EC2 instance
+      amazon.aws.ec2_instance:
+        name: http-server
+        key_name: devops-keys
+        instance_type: t3.micro
+        image_id: ami-01a00762f46d584a1
+        region: ap-south-1
+        wait: true
+
+        network:
+          assign_public_ip: true
+          subnet_id: subnet-0cc2d45e69cc3e548
+
+        security_groups:
+          - http-sg
+
+        tags:
+          Type: http-server
+          Environment: QA
+
+        count: 1
+        # exact_count: 0
+        # count_tag:
+        #   Name: http-server
+        state: running
+
+      register: ec2_output
+
+    - name: Display EC2 details
+      debug:
+        var: ec2_output.instances

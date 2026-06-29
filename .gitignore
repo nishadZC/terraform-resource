@@ -3,3 +3,5 @@
 *.tfstate.backup
 *.terraform.lock.hcl
 /personal_key
+terraform-resource/Infrastructure/jenkins_key
+terraform/terraform-resource/Infrastructure/jenkins_key.pub

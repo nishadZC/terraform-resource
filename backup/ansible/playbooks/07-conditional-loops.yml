@@ -1,0 +1,23 @@
+---
+- hosts: qa
+  vars:
+    system: "{{ ansible_system }}"
+    windows_color: "red"
+    linux_color: "blue"
+  tasks:
+    # - debug: var=hostvars
+    - debug: var=ansible_system
+    - debug: var=windows_color
+      when: system == "Windows"
+    - debug: var=linux_color
+      when: system == "Linux"
+    - debug: var=item
+      with_items:
+        - item1
+        - item2
+    - debug: var=item.name
+      with_items:
+        - name: "Vinayak"
+          age: 30
+        - name: "John"
+          age: 25

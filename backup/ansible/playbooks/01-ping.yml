@@ -1,0 +1,9 @@
+---
+- hosts: dev
+  tasks:
+    - name: Ping all hosts
+      action: ping
+    - debug: msg="Hello, World!"
+- hosts: qa
+  tasks:
+    - debug: msg="Hello, World!"

@@ -1,0 +1,12 @@
+---
+- hosts: dev
+  vars_files:
+    - variables.yml
+  vars:
+    my_variable: "Hello, last preference!"
+  tasks:
+    - name: Set a variable
+      debug: msg="{{ my_variable }}"
+
+# Note: CMD Line has the highest preference, then variables.yml file , then vars
+# CMD Line Syntax: ansible-playbook playbooks/03-variables.yml -e "my_variable=Hello, CMD Line!"

@@ -1,0 +1,9 @@
+---
+- hosts: qa
+  tasks:
+    - name: Kernel
+      debug: msg="{{ ansible_kernel }}"
+
+    - name: OS
+      debug: msg="{{ ansible_distribution }} {{ ansible_distribution_version }}"
+    - debug: var=ansible_architecture
