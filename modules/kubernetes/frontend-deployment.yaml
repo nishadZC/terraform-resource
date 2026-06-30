@@ -1,0 +1,77 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: frontend
+#   namespace: default
+#   labels:
+#     app: frontend
+#     version: v1
+# spec:
+#   replicas: 2  # Initial replicas, will be auto-scaled by HPA
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxSurge: 1
+#       maxUnavailable: 0
+#   selector:
+#     matchLabels:
+#       app: frontend
+#   template:
+#     metadata:
+#       labels:
+#         app: frontend
+#     spec:
+#       serviceAccountName: frontend-sa
+#       containers:
+#       - name: frontend
+#         image: FRONTEND_IMAGE_URI  # Will be replaced by Terraform
+#         imagePullPolicy: Always
+#         ports:
+#         - containerPort: 80
+#           protocol: TCP
+#         resources:
+#           requests:
+#             cpu: 200m
+#             memory: 256Mi
+#           limits:
+#             cpu: 400m
+#             memory: 512Mi
+#         livenessProbe:
+#           httpGet:
+#             path: /
+#             port: 80
+#           initialDelaySeconds: 30
+#           periodSeconds: 10
+#           timeoutSeconds: 5
+#           failureThreshold: 3
+#         readinessProbe:
+#           httpGet:
+#             path: /
+#             port: 80
+#           initialDelaySeconds: 10
+#           periodSeconds: 5
+#           timeoutSeconds: 3
+#           failureThreshold: 2
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend
+#   namespace: default
+#   labels:
+#     app: frontend
+# spec:
+#   type: ClusterIP
+#   ports:
+#   - port: 80
+#     targetPort: 80
+#     protocol: TCP
+#     name: http
+#   selector:
+#     app: frontend
+# ---
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: frontend-sa
+#   namespace: default
